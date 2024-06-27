@@ -1,8 +1,25 @@
-import Chat from "../../components/chat/Chat";
-import List from "../../components/list/List";
-import "./profilePage.scss";
+import { useNavigate } from 'react-router-dom';
+import Chat from '../../components/chat/Chat';
+import List from '../../components/list/List';
+import './profilePage.scss';
+import axios from 'axios';
+import { useContext, useEffect } from 'react';
+import { AuthContext } from '../../../context/AuthContext';
 
 function ProfilePage() {
+  const navigate = useNavigate();
+  const { updateUser, currentUser } = useContext(AuthContext);
+
+  const handelLogout = async () => {
+    try {
+      const res = await axios.post('http://localhost:8800/api/auth/logout');
+    } catch (err) {
+      console.log(err);
+    } finally {
+      updateUser(null);
+      navigate('/login');
+    }
+  };
   return (
     <div className="profilePage">
       <div className="details">
@@ -14,16 +31,16 @@ function ProfilePage() {
           <div className="info">
             <span>
               Avatar:
-              <img
-                src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                alt=""
-              />
+              <img src={currentUser.avatar || 'noavatar.jpg'} alt="" />
             </span>
             <span>
-              Username: <b>John Doe</b>
+              Username: <b>{currentUser.username}</b>
             </span>
             <span>
-              E-mail: <b>john@gmail.com</b>
+              E-mail: <b>{currentUser.email}</b>
+            </span>
+            <span>
+              <button onClick={handelLogout}>Logout</button>
             </span>
           </div>
           <div className="title">
@@ -39,7 +56,7 @@ function ProfilePage() {
       </div>
       <div className="chatContainer">
         <div className="wrapper">
-          <Chat/>
+          <Chat />
         </div>
       </div>
     </div>
