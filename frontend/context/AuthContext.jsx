@@ -7,6 +7,8 @@ export const AuthContextProvider = ({ children }) => {
     JSON.parse(localStorage.getItem('user')) || null
   );
 
+  console.log("local",JSON.parse(localStorage.getItem('user')) )
+
   const updateUser = (data) => {
     setCurrentUser(data);
   };

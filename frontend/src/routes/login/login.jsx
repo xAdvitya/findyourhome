@@ -1,8 +1,8 @@
 import { useState,useContext } from 'react';
 import './login.scss';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { AuthContext } from '../../../context/AuthContext';
+import apiRequest from '../../lib/apiRequest';
 
 function Login() {
   const [error, setError] = useState('');
@@ -19,7 +19,7 @@ function Login() {
     const password = formData.get('password');
 
     try {
-      const res = await axios.post('http://localhost:8800/api/auth/login', {
+      const res = await apiRequest.post('/auth/login', {
         username,
         password,
       });

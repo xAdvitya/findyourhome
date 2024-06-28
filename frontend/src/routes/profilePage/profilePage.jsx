@@ -1,18 +1,19 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Chat from '../../components/chat/Chat';
 import List from '../../components/list/List';
 import './profilePage.scss';
-import axios from 'axios';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
+import apiRequest from '../../lib/apiRequest';
 
 function ProfilePage() {
-  const navigate = useNavigate();
+
   const { updateUser, currentUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handelLogout = async () => {
     try {
-      const res = await axios.post('http://localhost:8800/api/auth/logout');
+      const res = await apiRequest.post('/auth/logout');
     } catch (err) {
       console.log(err);
     } finally {
@@ -26,7 +27,9 @@ function ProfilePage() {
         <div className="wrapper">
           <div className="title">
             <h1>User Information</h1>
+            <Link to="/profile/update">
             <button>Update Profile</button>
+            </Link>
           </div>
           <div className="info">
             <span>
