@@ -1,14 +1,14 @@
-import { useContext, useState } from 'react';
-import './profileUpdatePage.scss';
-import { AuthContext } from '../../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import apiRequest from '../../lib/apiRequest';
-import UploadWidget from '../../components/uploadWidget/UploadWidget';
+import { useContext, useState } from "react";
+import "./profileUpdatePage.scss";
+import { AuthContext } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import apiRequest from "../../lib/apiRequest";
+import UploadWidget from "../../components/uploadWidget/UploadWidget";
 
 function ProfileUpdatePage() {
   const { currentUser, updateUser } = useContext(AuthContext);
-  const [avatar, setAvatar] = useState(currentUser.avatar);
-  const [error, setError] = useState('');
+  const [avatar, setAvatar] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -22,10 +22,10 @@ function ProfileUpdatePage() {
         username,
         email,
         password,
-        avatar
+        avatar: avatar[0],
       });
       updateUser(res.data);
-      navigate('/profile');
+      navigate("/profile");
     } catch (err) {
       console.log(err);
       setError(err?.response?.data?.message);
@@ -61,18 +61,22 @@ function ProfileUpdatePage() {
           </div>
           <button>Update</button>
           {error && <span>error</span>}
-        </form> 
+        </form>
       </div>
       <div className="sideContainer">
-        <img src={avatar || '/noavatar.jpg'} alt="" className="avatar" />
+        <img
+          src={avatar[0] || currentUser.avatar || "/noavatar.jpg"}
+          alt=""
+          className="avatar"
+        />
         <UploadWidget
           uwConfig={{
-            cloudName: 'dncejrxwg',
-            uploadPreset: 'findyourhome',
+            cloudName: "dncejrxwg",
+            uploadPreset: "findyourhome",
             multiple: false,
-            folder: 'avatars',
+            folder: "avatars",
           }}
-          setAvatar={setAvatar}
+          setState={setAvatar}
         />
       </div>
     </div>

@@ -31,9 +31,9 @@ function UploadWidget({ uwConfig, setPublicId, setAvatar }) {
         uwConfig,
         (error, result) => {
           if (!error && result && result.event === "success") {
-            setAvatar(result.info.secure_url);
+            setState((prev) => [...prev, result.info.secure_url]);
           }
-        }
+        },
       );
 
       document.getElementById("upload_widget").addEventListener(
@@ -41,7 +41,7 @@ function UploadWidget({ uwConfig, setPublicId, setAvatar }) {
         function () {
           myWidget.open();
         },
-        false
+        false,
       );
     }
   };
