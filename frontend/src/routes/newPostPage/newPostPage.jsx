@@ -8,46 +8,49 @@ import { useNavigate } from "react-router-dom";
 
 function NewPostPage() {
   const [value, setValue] = useState("");
-  const [error, setError] = useState("");
   const [images, setImages] = useState([]);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const inputs = Object.fromEntries(formData);
+
+    const postData = {
+      title: formData.get("title"),
+      price: parseInt(formData.get("price")),
+      address: formData.get("address"),
+      city: formData.get("city"),
+      bedroom: parseInt(formData.get("bedroom")),
+      bathroom: parseInt(formData.get("bathroom")),
+      type: formData.get("type"),
+      property: formData.get("property"),
+      latitude: formData.get("latitude"),
+      longitude: formData.get("longitude"),
+      images: images,
+    };
+
+    const postDetail = {
+      desc: value,
+      utilities: formData.get("utilities"),
+      pet: formData.get("pet"),
+      income: formData.get("income"),
+      size: parseInt(formData.get("size")),
+      school: parseInt(formData.get("school")),
+      bus: parseInt(formData.get("bus")),
+      restaurant: parseInt(formData.get("restaurant")),
+    };
+
     try {
       const res = await apiRequest.post("/posts", {
-        postData: {
-          title: inputs.title,
-          price: parseInt(inputs.price),
-          address: inputs.address,
-          description: inputs.desc,
-          city: inputs.city,
-          bedroom: parseInt(inputs.bedroom),
-          bathroom: parseInt(inputs.bathroom),
-          latitude: inputs.latitude,
-          longitude: inputs.longitude,
-          property: inputs.property,
-          images: [],
-          type: inputs.type,
-        },
-        postDetails: {
-          desc: value,
-          pet: inputs.pet,
-          utilities: inputs.utilities,
-          income: inputs.income,
-          size: parseInt(inputs.size),
-          school: parseInt(inputs.school),
-          bus: parseInt(inputs.bus),
-          restaurant: parseInt(inputs.restaurant),
-        },
+        postData,
+        postDetail,
       });
       navigate("/" + res.data.id);
     } catch (err) {
-      console.log(err);
-      setError(error);
+      console.error(err);
+      setError("Failed to add post");
     }
   };
 
@@ -63,7 +66,7 @@ function NewPostPage() {
             </div>
             <div className="item">
               <label htmlFor="price">Price</label>
-              <input min={1000} id="price" name="price" type="number" />
+              <input id="price" name="price" type="number" />
             </div>
             <div className="item">
               <label htmlFor="address">Address</label>
@@ -103,7 +106,7 @@ function NewPostPage() {
               </select>
             </div>
             <div className="item">
-              <label htmlFor="property">Property</label>
+              <label htmlFor="type">Property</label>
               <select name="property">
                 <option value="apartment">Apartment</option>
                 <option value="house">House</option>
@@ -111,6 +114,7 @@ function NewPostPage() {
                 <option value="land">Land</option>
               </select>
             </div>
+
             <div className="item">
               <label htmlFor="utilities">Utilities Policy</label>
               <select name="utilities">
@@ -144,7 +148,7 @@ function NewPostPage() {
               <input min={0} id="school" name="school" type="number" />
             </div>
             <div className="item">
-              <label htmlFor="bus">Bus</label>
+              <label htmlFor="bus">bus</label>
               <input min={0} id="bus" name="bus" type="number" />
             </div>
             <div className="item">
@@ -152,6 +156,7 @@ function NewPostPage() {
               <input min={0} id="restaurant" name="restaurant" type="number" />
             </div>
             <button className="sendButton">Add</button>
+            {error && <span>error</span>}
           </form>
         </div>
       </div>
@@ -162,8 +167,8 @@ function NewPostPage() {
         <UploadWidget
           uwConfig={{
             multiple: true,
-            cloudName: "dncejrxwg",
-            uploadPreset: "findyourhome",
+            cloudName: "lamadev",
+            uploadPreset: "estate",
             folder: "posts",
           }}
           setState={setImages}
