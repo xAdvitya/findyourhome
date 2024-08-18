@@ -1,19 +1,18 @@
-import { useContext, useState } from 'react';
-import './navbar.scss';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../../../context/AuthContext';
+import { useContext, useState } from "react";
+import "./navbar.scss";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../../../context/AuthContext";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
   const { currentUser } = useContext(AuthContext);
-
   const user = true;
   return (
     <nav>
       <div className="left">
         <a href="/" className="logo">
           <img src="/logo.png" alt="" />
-          <span>LamaEstate</span>
+          <span>FindYourHome </span>
         </a>
         <a href="/">Home</a>
         <a href="/">About</a>
@@ -23,10 +22,9 @@ function Navbar() {
       <div className="right">
         {currentUser ? (
           <div className="user">
-            <img src={currentUser.avatar || '/noavatar.jpg'} alt="" />
-            <span>{currentUser.username || 'hi'}</span>
+            <img src={currentUser.avatar || "/noavatar.jpg"} alt="" />
+            <span>{currentUser.username || "hi"}</span>
             <Link to="/profile" className="profile">
-              <div className="notification">3</div>
               <span>Profile</span>
             </Link>
           </div>
@@ -45,7 +43,7 @@ function Navbar() {
             onClick={() => setOpen((prev) => !prev)}
           />
         </div>
-        <div className={open ? 'menu active' : 'menu'}>
+        <div className={open ? "menu active" : "menu"}>
           <a href="/">Home</a>
           <a href="/">About</a>
           <a href="/">Contact</a>

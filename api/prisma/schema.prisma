@@ -13,17 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  email     String     @unique
-  username  String     @unique
-  password  String
-  avatar    String?
-  createdAt DateTime   @default(now())
-  posts     Post[]
-  SavedPost SavedPost?
-}
-
 model Post {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   title      String
@@ -44,17 +33,6 @@ model Post {
   savedPosts SavedPost[]
 }
 
-model SavedPost {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
-  post      Post     @relation(fields: [postId], references: [id])
-  userId    String   @unique @db.ObjectId
-  postId    String   @unique @db.ObjectId
-  createdAt DateTime @default(now())
-
-  @@unique([userId, postId])
-}
-
 enum Type {
   buy
   rent
@@ -70,8 +48,8 @@ enum Property {
 model PostDetail {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   desc       String
-  pet        String?
   utilities  String?
+  pet        String?
   income     String?
   size       Int?
   school     Int?
@@ -81,3 +59,24 @@ model PostDetail {
   postId     String  @unique @db.ObjectId
 }
 
+model SavedPost {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String   @unique @db.ObjectId
+  postId    String   @unique @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model User {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  email      String      @unique
+  username   String      @unique
+  password   String
+  avatar     String?
+  createdAt  DateTime    @default(now())
+  posts      Post[]
+  savedPosts SavedPost[]
+}

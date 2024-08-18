@@ -1,13 +1,13 @@
-import prisma from "../lib/prisma.js";
 import bcrypt from "bcrypt";
+import prisma from "../lib/prisma.js";
 
 export const getUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany();
     res.status(200).json(users);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to get users!" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to get musers!" });
   }
 };
 
@@ -17,10 +17,14 @@ export const getUser = async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id },
     });
-    res.status(200).json(user);
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ message: "User not found!" });
+    }
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to get user!" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to get kuser!" });
   }
 };
 
@@ -52,8 +56,8 @@ export const updateUser = async (req, res) => {
 
     res.status(200).json(rest);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to update users!" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to update user!" });
   }
 };
 
@@ -71,7 +75,67 @@ export const deleteUser = async (req, res) => {
     });
     res.status(200).json({ message: "User deleted" });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to delete users!" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to delete user!" });
+  }
+};
+
+export const savePost = async (req, res) => {
+  const postId = req.body.postId;
+  const tokenUserId = req.userId;
+
+  try {
+    const savedPost = await prisma.savedPost.findUnique({
+      where: {
+        userId_postId: {
+          userId: tokenUserId,
+          postId,
+        },
+      },
+    });
+
+    if (savedPost) {
+      await prisma.savedPost.delete({
+        where: {
+          id: savedPost.id,
+        },
+      });
+      res.status(200).json({ message: "Post removed from saved list" });
+    } else {
+      await prisma.savedPost.create({
+        data: {
+          userId: tokenUserId,
+          postId,
+        },
+      });
+      res.status(200).json({ message: "Post saved" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to save post!" });
+  }
+};
+
+export const profilePosts = async (req, res) => {
+  const tokenUserId = req.userId;
+  if (!tokenUserId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const userPosts = await prisma.post.findMany({
+      where: { userId: tokenUserId },
+    });
+    const saved = await prisma.savedPost.findMany({
+      where: { userId: tokenUserId },
+      include: {
+        post: true,
+      },
+    });
+    const savedPosts = saved.map((item) => item.post);
+    res.status(200).json({ userPosts, savedPosts });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to get profile posts!" });
   }
 };

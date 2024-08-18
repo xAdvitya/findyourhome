@@ -9,14 +9,17 @@ import apiRequest from "../../lib/apiRequest";
 
 function SinglePage() {
   const post = useLoaderData();
-  const [saved, setSaved] = useState(post.isSaved);
+  const [saved, setSaved] = useState(post?.isSaved || false);
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  console.log(post);
 
   const handleSave = async () => {
     if (!currentUser) {
       navigate("/login");
     }
+
     setSaved((prev) => !prev);
     try {
       await apiRequest.post("/users/save", { postId: post.id });
@@ -42,8 +45,8 @@ function SinglePage() {
                 <div className="price">$ {post.price}</div>
               </div>
               <div className="user">
-                <img src={post.user.avatar} alt="" />
-                <span>{post.user.username}</span>
+                <img src={post.user?.avatar} alt="" />
+                <span>{post.user?.username}</span>
               </div>
             </div>
             <div

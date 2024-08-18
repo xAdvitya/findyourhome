@@ -2,33 +2,32 @@ import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 
 export const getPosts = async (req, res) => {
-  const query = req.query;
-  console.log("hi");
+  const { city, type, property, bedroom, minPrice, maxPrice } = req.query;
+  console.log(req.query);
   try {
     const posts = await prisma.post.findMany({
       where: {
-        city: query.city || undefined,
-        type: query.type || undefined,
-        property: query.property || undefined,
-        bedroom: parseInt(query.bedroom) || undefined,
+        city: city || undefined,
+        type: type || undefined,
+        property: property || undefined,
+        bedroom: parseInt(bedroom) ? parseInt(bedroom) : undefined,
         price: {
-          gte: parseInt(query.minPrice) || undefined,
-          lte: parseInt(query.maxPrice) || undefined,
+          gte: parseInt(minPrice) ? parseInt(minPrice) : undefined,
+          lte: parseInt(maxPrice) ? parseInt(maxPrice) : undefined,
         },
       },
     });
 
-    // setTimeout(() => {
     res.status(200).json(posts);
-    // }, 3000);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({ message: "Failed to get posts" });
   }
 };
 
 export const getPost = async (req, res) => {
   const id = req.params.id;
+
   try {
     const post = await prisma.post.findUnique({
       where: { id },
@@ -36,8 +35,8 @@ export const getPost = async (req, res) => {
         postDetail: true,
         user: {
           select: {
-            username: true,
             avatar: true,
+            username: true,
           },
         },
       },
@@ -50,12 +49,15 @@ export const getPost = async (req, res) => {
     const token = req.cookies?.token;
 
     if (token) {
-      jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, payload) => {
-        if (err) {
-          console.log(err);
-          return res.status(401).json({ message: "Invalid token" });
-        }
+      try {
+        const payload = await new Promise((resolve, reject) => {
+          jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+            if (err) reject(err);
+            else resolve(decoded);
+          });
+        });
 
+        // Check if the post is saved by the user
         const saved = await prisma.savedPost.findUnique({
           where: {
             userId_postId: {
@@ -65,21 +67,35 @@ export const getPost = async (req, res) => {
           },
         });
 
-        return res.status(200).json({ ...post, isSaved: saved ? true : false });
-      });
-    } else {
-      return res.status(200).json({ ...post, isSaved: false });
+        return res.status(200).json({
+          ...post,
+          postDetail: post.postDetail,
+          user: post.user,
+          isSaved: saved ? true : false,
+        });
+      } catch (err) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
     }
+
+    return res.status(200).json({
+      ...post,
+      postDetail: post.postDetail,
+      user: post.user,
+      isSaved: false,
+    });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(500).json({ message: "Failed to get post" });
   }
 };
 
 export const addPosts = async (req, res) => {
-  const body = req.body;
+  const { postData, postDetail } = req.body;
   const tokenUserId = req.userId;
 
+  console.log("det");
+  console.log(postDetail);
   if (!tokenUserId) {
     return res.status(401).json({ message: "User not authenticated" });
   }
@@ -87,29 +103,54 @@ export const addPosts = async (req, res) => {
   try {
     const newPost = await prisma.post.create({
       data: {
-        ...body.postData,
+        ...postData,
         userId: tokenUserId,
-        postDetail: {
-          create: body.postDetail,
-        },
       },
     });
+    console.log("Post Created:", newPost);
 
-    // Send the response only once
-    return res.status(200).json(newPost);
+    if (postDetail) {
+      const newPostDetail = await prisma.postDetail.create({
+        data: {
+          ...postDetail,
+          postId: newPost.id,
+        },
+      });
+      console.log("PostDetail Created:", newPostDetail);
+    }
+
+    return res.status(201).json(newPost);
   } catch (err) {
-    console.log(err);
-    // Send the response only once
+    console.error(err);
     return res.status(500).json({ message: "Failed to create post" });
   }
 };
 
 export const updatePost = async (req, res) => {
+  const id = req.params.id;
+  const { postData } = req.body;
+  const tokenUserId = req.userId;
+
   try {
-    res.status(200).json();
+    const post = await prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.userId !== tokenUserId) {
+      return res.status(403).json({ message: "Not Authorized!" });
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: { id },
+      data: postData,
+    });
+
+    return res.status(200).json(updatedPost);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to update posts" });
+    console.error(err);
+    return res.status(500).json({ message: "Failed to update post" });
   }
 };
 
@@ -118,21 +159,21 @@ export const deletePost = async (req, res) => {
   const tokenUserId = req.userId;
 
   try {
-    const post = await prisma.post.findUnique({
-      where: { id },
-    });
+    const post = await prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
     if (post.userId !== tokenUserId) {
       return res.status(403).json({ message: "Not Authorized!" });
     }
 
-    await prisma.post.delete({
-      where: { id },
-    });
+    await prisma.post.delete({ where: { id } });
 
-    res.status(200).json({ message: "Post deleted" });
+    return res.status(200).json({ message: "Post deleted" });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to delete post" });
+    console.error(err);
+    return res.status(500).json({ message: "Failed to delete post" });
   }
 };

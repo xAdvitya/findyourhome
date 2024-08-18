@@ -1,11 +1,11 @@
-import { useState,useContext } from 'react';
-import './login.scss';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../context/AuthContext';
-import apiRequest from '../../lib/apiRequest';
+import { useState, useContext } from "react";
+import "./login.scss";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../../context/AuthContext";
+import apiRequest from "../../lib/apiRequest";
 
 function Login() {
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { updateUser } = useContext(AuthContext);
 
@@ -13,19 +13,18 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
     const formData = new FormData(e.target);
-    const username = formData.get('username');
-    const password = formData.get('password');
+    const username = formData.get("username");
+    const password = formData.get("password");
 
     try {
-      const res = await apiRequest.post('/auth/login', {
+      const res = await apiRequest.post("/auth/login", {
         username,
         password,
       });
-      console.log(res);
       updateUser(res.data);
-      navigate('/');
+      navigate("/");
     } catch (err) {
       console.log(err);
       setError(err.response.data.message);
