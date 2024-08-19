@@ -1,4 +1,6 @@
 import HomePage from "./routes/homePage/homePage";
+import AboutPage from "./routes/aboutPage/aboutPage";
+import ContactPage from "./routes/contactPage/contactPage";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ListPage from "./routes/listPage/listPage";
 import { RequireAuth, Layout } from "./routes/layout/layout";
@@ -23,6 +25,14 @@ function App() {
         {
           path: "/",
           element: <HomePage />,
+        },
+        {
+          path: "/about",
+          element: <AboutPage />,
+        },
+        {
+          path: "/contact",
+          element: <ContactPage />,
         },
         {
           path: "/list",
