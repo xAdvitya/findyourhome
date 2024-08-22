@@ -16,41 +16,38 @@ function NewPostPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-
-    const postData = {
-      title: formData.get("title"),
-      price: parseInt(formData.get("price")),
-      address: formData.get("address"),
-      city: formData.get("city"),
-      bedroom: parseInt(formData.get("bedroom")),
-      bathroom: parseInt(formData.get("bathroom")),
-      type: formData.get("type"),
-      property: formData.get("property"),
-      latitude: formData.get("latitude"),
-      longitude: formData.get("longitude"),
-      images: images,
-    };
-
-    const postDetail = {
-      desc: value,
-      utilities: formData.get("utilities"),
-      pet: formData.get("pet"),
-      income: formData.get("income"),
-      size: parseInt(formData.get("size")),
-      school: parseInt(formData.get("school")),
-      bus: parseInt(formData.get("bus")),
-      restaurant: parseInt(formData.get("restaurant")),
-    };
+    const inputs = Object.fromEntries(formData);
 
     try {
       const res = await apiRequest.post("/posts", {
-        postData,
-        postDetail,
+        postData: {
+          title: inputs.title,
+          price: parseInt(inputs.price),
+          address: inputs.address,
+          city: inputs.city,
+          bedroom: parseInt(inputs.bedroom),
+          bathroom: parseInt(inputs.bathroom),
+          type: inputs.type,
+          property: inputs.property,
+          latitude: inputs.latitude,
+          longitude: inputs.longitude,
+          images: images,
+        },
+        postDetail: {
+          desc: value,
+          utilities: inputs.utilities,
+          pet: inputs.pet,
+          income: inputs.income,
+          size: parseInt(inputs.size),
+          school: parseInt(inputs.school),
+          bus: parseInt(inputs.bus),
+          restaurant: parseInt(inputs.restaurant),
+        },
       });
       navigate("/" + res.data.id);
     } catch (err) {
-      console.error(err);
-      setError("Failed to add post");
+      console.log(err);
+      setError(error);
     }
   };
 
@@ -168,7 +165,7 @@ function NewPostPage() {
           uwConfig={{
             multiple: true,
             cloudName: "dncejrxwg",
-            uploadPreset: "findyourname",
+            uploadPreset: "findyourhome",
             folder: "posts",
           }}
           setState={setImages}

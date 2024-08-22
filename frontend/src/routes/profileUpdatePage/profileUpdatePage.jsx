@@ -72,7 +72,7 @@ function ProfileUpdatePage() {
         <UploadWidget
           uwConfig={{
             cloudName: "dncejrxwg",
-            uploadPreset: "findyourhome",
+            uploadPreset: "findyourhomenow",
             multiple: false,
             folder: "avatars",
           }}
